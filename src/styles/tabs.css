@@ -1,0 +1,183 @@
+/* ==========================================================================
+   Menu categories.
+   With JavaScript: tabs that switch in place and keep a shareable #address.
+   Without: every category is shown, one after the other, and the links jump
+   down to them.
+   ========================================================================== */
+
+.tabs__bar {
+  position: sticky;
+  top: var(--header-h);
+  z-index: 20;
+  background: var(--bg);
+  border-bottom: 1px solid var(--rule);
+}
+
+.tabs__list {
+  position: relative;
+  display: flex;
+  gap: clamp(1.5rem, 4vw, 3.25rem);
+  overflow-x: auto;
+  scrollbar-width: none;
+  /* Lets the last tab scroll clear of the edge on phones. */
+  margin-inline: calc(var(--gutter) * -1);
+  padding-inline: var(--gutter);
+}
+
+.tabs__list::-webkit-scrollbar {
+  display: none;
+}
+
+.tabs__tab {
+  flex: none;
+  padding: 1.05rem 0 1.4rem;
+  font-family: var(--font-display);
+  font-size: var(--step-1);
+  line-height: 1.2;
+  white-space: nowrap;
+  text-decoration: none;
+  color: var(--muted);
+  transition:
+    color 0.25s,
+    translate 0.35s var(--ease);
+}
+
+@media (hover: hover) {
+  .tabs__tab:hover:not([aria-selected='true']) {
+    translate: 0 -2px;
+  }
+}
+
+.tabs__tab:hover,
+.tabs__tab[aria-selected='true'] {
+  color: var(--fg);
+}
+
+.tabs__tab:focus-visible {
+  outline-offset: -2px;
+}
+
+/* The bow tie sits under the open category and glides to the next. */
+.tabs__marker {
+  position: absolute;
+  left: 0;
+  bottom: 0.5rem;
+  display: none;
+  width: 1.15rem;
+  color: var(--accent);
+  translate: var(--x, 0) 0;
+  transition: translate 0.55s var(--ease);
+  pointer-events: none;
+}
+
+.js .tabs__marker {
+  display: block;
+}
+
+/* ----- Panels ----- */
+
+.tabs__panel {
+  padding-block: clamp(3rem, 7vw, 5.5rem);
+  scroll-margin-top: calc(var(--header-h) + 4rem);
+}
+
+.tabs__panel + .tabs__panel {
+  border-top: 1px solid var(--rule);
+}
+
+.js .tabs__panel:not(.is-active) {
+  display: none;
+}
+
+.js .tabs__panel + .tabs__panel {
+  border-top: 0;
+}
+
+.tabs__title {
+  font-size: var(--step-3);
+}
+
+.tabs__intro {
+  margin-top: 1rem;
+  max-width: var(--measure);
+  color: var(--muted);
+}
+
+.tabs__body {
+  display: grid;
+  gap: 2.5rem var(--col-gap);
+  margin-top: clamp(2rem, 4vw, 3.5rem);
+}
+
+.tabs__figure {
+  width: min(100%, 24rem);
+}
+
+.menu-group {
+  margin-bottom: 2.75rem;
+  break-inside: avoid;
+}
+
+.menu-group:last-child {
+  margin-bottom: 0;
+}
+
+/* A group with no heading is a plain list and may run over two columns. */
+.menu-group--plain {
+  break-inside: auto;
+}
+
+.menu-group__title {
+  margin-bottom: 0.35rem;
+  padding-bottom: 0.7rem;
+  border-bottom: 1px solid var(--rule);
+  font-size: var(--step-1);
+  font-style: italic;
+  line-height: 1.2;
+}
+
+.tabs__note {
+  margin-top: clamp(2.5rem, 5vw, 4rem);
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--rule);
+  max-width: 44rem;
+  font-size: var(--step--1);
+  color: var(--muted);
+}
+
+@media (min-width: 60rem) {
+  .tabs__body--figure {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    align-items: start;
+  }
+
+  .tabs__body--figure .tabs__figure {
+    grid-column: 1 / span 4;
+    position: sticky;
+    top: calc(var(--header-h) + 5.5rem);
+    width: 100%;
+  }
+
+  .tabs__body--figure .tabs__groups {
+    grid-column: 6 / span 7;
+  }
+
+  /* No picture for this category: the list takes the full width in two columns. */
+  .tabs__body--plain .tabs__groups {
+    columns: 2;
+    column-gap: clamp(3rem, 7vw, 7rem);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .js .tabs__panel.is-active {
+    animation: panel-in 0.55s var(--ease);
+  }
+}
+
+@keyframes panel-in {
+  from {
+    opacity: 0;
+    translate: 0 0.9rem;
+  }
+}

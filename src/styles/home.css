@@ -1,0 +1,123 @@
+/* ---------- Address and hours, under the opening scene ---------- */
+
+.facts {
+  border-bottom: 1px solid var(--rule);
+}
+
+.facts__row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.25rem 2.5rem;
+  padding-block: 1.1rem;
+  font-size: var(--step--1);
+  color: var(--muted);
+}
+
+/* ---------- Cuisine ---------- */
+
+.cuisine__grid {
+  display: grid;
+  gap: 3rem var(--col-gap);
+}
+
+.cuisine__text {
+  margin-top: 1.75rem;
+  max-width: var(--measure);
+  color: var(--muted);
+}
+
+.cuisine__link {
+  display: inline-block;
+  margin-top: 1.75rem;
+}
+
+.origins li {
+  display: grid;
+  grid-template-columns: minmax(6.5rem, 0.32fr) 1fr;
+  align-items: baseline;
+  gap: 1rem;
+  padding-block: 1.15rem;
+  border-top: 1px solid var(--rule);
+}
+
+.origins li:last-child {
+  border-bottom: 1px solid var(--rule);
+}
+
+.origins__name {
+  font-family: var(--font-display);
+  font-size: var(--step-1);
+  font-style: italic;
+  line-height: 1.15;
+}
+
+.origins__dishes {
+  color: var(--muted);
+}
+
+.cuisine__plate--b {
+  width: min(100%, 22rem);
+  margin-left: auto;
+}
+
+@media (min-width: 60rem) {
+  .cuisine__grid {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    align-items: start;
+    row-gap: clamp(3rem, 6vw, 5.5rem);
+  }
+
+  .cuisine__intro {
+    grid-column: 1 / span 6;
+  }
+
+  .cuisine__plate--a {
+    grid-column: 8 / span 5;
+  }
+
+  .cuisine__origins {
+    grid-column: 1 / span 6;
+  }
+
+  .cuisine__plate--b {
+    grid-column: 8 / span 4;
+    width: 100%;
+    margin-left: 0;
+  }
+}
+
+/* ---------- Salle & lounge ----------
+   Two quarter circles side by side, like the pair of screens in the room. */
+
+.rooms__title {
+  margin-bottom: clamp(2.5rem, 5vw, 4.5rem);
+}
+
+.rooms__pair {
+  display: grid;
+  gap: 3.5rem 1.25rem;
+  max-width: 70rem;
+}
+
+.rooms__name {
+  margin-top: 1.5rem;
+  font-size: var(--step-2);
+}
+
+.rooms__text {
+  margin-top: 0.75rem;
+  max-width: 27rem;
+  color: var(--muted);
+}
+
+.rooms__link {
+  display: inline-block;
+  margin-top: 1.25rem;
+}
+
+@media (min-width: 44rem) {
+  .rooms__pair {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

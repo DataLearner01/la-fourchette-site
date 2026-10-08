@@ -1,0 +1,23 @@
+---
+// The bow tie from the logo, used as the site's single ornament.
+interface Props {
+  class?: string;
+}
+const { class: className } = Astro.props;
+---
+
+<svg class={className} viewBox="0 0 24 12" aria-hidden="true" focusable="false">
+  <path
+    fill="currentColor"
+    d="M12 6 1.6.9Q0 6 1.6 11.1ZM12 6 22.4.9Q24 6 22.4 11.1Z"
+  ></path>
+  <rect fill="currentColor" x="10.1" y="3.6" width="3.8" height="4.8" rx="1.2"></rect>
+</svg>
+
+<style>
+  svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+</style>

@@ -1,0 +1,32 @@
+---
+import Inner from './Inner.astro';
+import MenuTabs from '../components/MenuTabs.astro';
+import ReserveBand from '../components/ReserveBand.astro';
+import type { Lang } from '../data/routes';
+import { pages } from '../content/pages';
+import { barMenu, barMenuNote } from '../content/bar';
+
+import cocktail from '../assets/graded/cocktail.jpg';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = pages.bar[lang];
+
+const pictures = {
+  cocktails: { src: cocktail, alt: t.alts.cocktails, caption: t.captions.cocktails },
+};
+---
+
+<Inner lang={lang} page="bar" theme="dark" words={t.words}>
+  <MenuTabs
+    lang={lang}
+    label={t.tabsLabel}
+    categories={barMenu}
+    pictures={pictures}
+    note={barMenuNote}
+    theme="dark"
+  />
+  <ReserveBand lang={lang} />
+</Inner>

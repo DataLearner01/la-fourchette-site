@@ -1,0 +1,204 @@
+---
+// Category tabs for La Carte and Bar & Cave. See src/styles/tabs.css.
+import '../styles/tabs.css';
+import type { ImageMetadata } from 'astro';
+import BowTie from './BowTie.astro';
+import Frame from './Frame.astro';
+import PriceRow from './PriceRow.astro';
+import type { Lang } from '../data/routes';
+import { formatPrice, type Localised } from '../data/format';
+import { dietLabels, type MenuCategory } from '../content/menu';
+
+interface Picture {
+  src: ImageMetadata;
+  alt: string;
+  caption: string;
+  position?: string;
+  ratio?: [number, number];
+}
+
+interface Props {
+  lang: Lang;
+  label: string;
+  categories: MenuCategory[];
+  // Pictures by category id. A category without one is laid out as a wider list.
+  pictures?: Record<string, Picture>;
+  note: Localised;
+  theme?: 'dark' | 'light';
+}
+
+const { lang, label, categories, pictures = {}, note, theme = 'light' } = Astro.props;
+---
+
+<div class="tabs" data-tabs data-theme={theme}>
+  <div class="tabs__bar">
+    <div class="wrap">
+      <nav class="tabs__list" data-tablist aria-label={label}>
+        {
+          categories.map((category) => (
+            <a class="tabs__tab" data-tab href={`#${category.id}`}>
+              {category.label[lang]}
+            </a>
+          ))
+        }
+        <span class="tabs__marker" data-tab-marker aria-hidden="true">
+          <BowTie />
+        </span>
+      </nav>
+    </div>
+  </div>
+
+  <div class="wrap">
+    {
+      categories.map((category, index) => {
+        const picture = pictures[category.id];
+        return (
+          <section
+            class:list={['tabs__panel', { 'is-active': index === 0 }]}
+            data-panel
+            id={category.id}
+          >
+            <h2 class="tabs__title">{category.label[lang]}</h2>
+            {category.intro && <p class="tabs__intro">{category.intro[lang]}</p>}
+
+            <div class:list={['tabs__body', picture ? 'tabs__body--figure' : 'tabs__body--plain']}>
+              {picture && (
+                <figure class="tabs__figure">
+                  <Frame
+                    src={picture.src}
+                    alt={picture.alt}
+                    ratio={picture.ratio ?? [4, 5]}
+                    position={picture.position}
+                    sizes="(min-width: 60rem) 30vw, 24rem"
+                  />
+                  <figcaption>{picture.caption}</figcaption>
+                </figure>
+              )}
+
+              <div class="tabs__groups">
+                {category.groups.map((group) => (
+                  <div class:list={['menu-group', { 'menu-group--plain': !group.title }]}>
+                    {group.title && <h3 class="menu-group__title">{group.title[lang]}</h3>}
+                    <ul role="list">
+                      {group.items.map((item) => (
+                        <PriceRow
+                          name={item.name[lang]}
+                          note={item.note?.[lang]}
+                          tag={item.diet ? dietLabels[item.diet][lang] : undefined}
+                          price={item.price ? formatPrice(item.price) : undefined}
+                        />
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <p class="tabs__note">{note[lang]}</p>
+          </section>
+        );
+      })
+    }
+  </div>
+
+  <script is:inline>
+    // Open the category named in the address before the page is first painted.
+    (function () {
+      var root = document.currentScript.parentElement;
+      var id = decodeURIComponent(location.hash.slice(1));
+      if (!id) return;
+      var wanted = null;
+      var panels = root.querySelectorAll('[data-panel]');
+      for (var i = 0; i < panels.length; i++) if (panels[i].id === id) wanted = panels[i];
+      if (!wanted) return;
+      for (var j = 0; j < panels.length; j++) panels[j].classList.toggle('is-active', panels[j] === wanted);
+    })();
+  </script>
+</div>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-tabs]').forEach((root) => {
+    const list = root.querySelector<HTMLElement>('[data-tablist]')!;
+    const marker = root.querySelector<HTMLElement>('[data-tab-marker]')!;
+    const tabs = [...root.querySelectorAll<HTMLAnchorElement>('[data-tab]')];
+    const panels = [...root.querySelectorAll<HTMLElement>('[data-panel]')];
+    const ids = panels.map((panel) => panel.id);
+
+    // The links become real tabs only once the script is running.
+    list.setAttribute('role', 'tablist');
+    tabs.forEach((tab, index) => {
+      tab.id = `tab-${ids[index]}`;
+      tab.setAttribute('role', 'tab');
+      tab.setAttribute('aria-controls', ids[index]);
+    });
+    panels.forEach((panel, index) => {
+      panel.setAttribute('role', 'tabpanel');
+      panel.setAttribute('aria-labelledby', `tab-${ids[index]}`);
+    });
+
+    let current = Math.max(
+      0,
+      panels.findIndex((panel) => panel.classList.contains('is-active')),
+    );
+
+    function placeMarker() {
+      const tab = tabs[current];
+      marker.style.setProperty('--x', `${tab.offsetLeft + tab.offsetWidth / 2 - marker.offsetWidth / 2}px`);
+    }
+
+    function show(index: number, { remember = false, focus = false } = {}) {
+      current = index;
+      tabs.forEach((tab, i) => {
+        tab.setAttribute('aria-selected', String(i === index));
+        tab.tabIndex = i === index ? 0 : -1;
+      });
+      panels.forEach((panel, i) => panel.classList.toggle('is-active', i === index));
+      placeMarker();
+
+      // Keep the open tab in view when the row scrolls sideways on a phone.
+      const tab = tabs[index];
+      const overflowLeft = tab.offsetLeft - list.scrollLeft;
+      const overflowRight = tab.offsetLeft + tab.offsetWidth - (list.scrollLeft + list.clientWidth);
+      if (overflowLeft < 24 || overflowRight > -24) {
+        list.scrollTo({ left: tab.offsetLeft - list.clientWidth / 2 + tab.offsetWidth / 2, behavior: 'smooth' });
+      }
+
+      if (remember) {
+        // The address changes without adding a step to the back button.
+        history.replaceState(null, '', `#${ids[index]}`);
+        // Coming from far down a long list, start the new one at its top.
+        const top = root.getBoundingClientRect().top + window.scrollY - (parseFloat(getComputedStyle(list.closest('.tabs__bar')!).top) || 0);
+        if (window.scrollY > top) window.scrollTo({ top });
+      }
+      if (focus) tab.focus();
+    }
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener('click', (event) => {
+        event.preventDefault();
+        show(index, { remember: true });
+      });
+      tab.addEventListener('keydown', (event) => {
+        const moves: Record<string, number> = {
+          ArrowRight: (index + 1) % tabs.length,
+          ArrowLeft: (index - 1 + tabs.length) % tabs.length,
+          Home: 0,
+          End: tabs.length - 1,
+        };
+        if (!(event.key in moves)) return;
+        event.preventDefault();
+        show(moves[event.key], { remember: true, focus: true });
+      });
+    });
+
+    // A link elsewhere on the page, or an edited address, can also name a category.
+    window.addEventListener('hashchange', () => {
+      const index = ids.indexOf(decodeURIComponent(location.hash.slice(1)));
+      if (index >= 0) show(index);
+    });
+
+    show(current);
+    window.addEventListener('resize', placeMarker);
+    document.fonts?.ready.then(placeMarker);
+  });
+</script>

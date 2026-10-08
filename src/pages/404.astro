@@ -1,0 +1,115 @@
+---
+// One page answers every wrong address, in the language of the address typed:
+// English for anything under /en/, French otherwise.
+import Base from '../layouts/Base.astro';
+import BowTie from '../components/BowTie.astro';
+import { pageOrder, routes, navLabels, langs } from '../data/routes';
+import { common } from '../data/site';
+---
+
+<Base lang="fr" page={null} title="Page introuvable | La Fourchette, Douala" description={common.fr.notFoundText} noindex>
+  <section class="lost" data-theme="dark">
+    <div class="wrap">
+      {
+        langs.map((code) => (
+          <div class="lost__copy" data-lost={code} lang={code} hidden={code !== 'fr'}>
+            <p class="lost__number" aria-hidden="true">
+              4<span class="lost__bow"><BowTie /></span>4
+            </p>
+            <h1 class="lost__title">{common[code].notFoundTitle}</h1>
+            <p class="lost__text">{common[code].notFoundText}</p>
+            <ul class="lost__links" role="list">
+              {pageOrder.map((key) => (
+                <li>
+                  <a class="link" href={routes[key][code]}>
+                    {navLabels[key][code]}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  <script is:inline>
+    // Show the English copy for addresses under /en/.
+    (function () {
+      if (!/^\/en(\/|$)/.test(location.pathname)) return;
+      document.documentElement.lang = 'en';
+      document.title = 'Page not found | La Fourchette, Douala';
+      var blocks = document.querySelectorAll('[data-lost]');
+      for (var i = 0; i < blocks.length; i++) blocks[i].hidden = blocks[i].getAttribute('data-lost') !== 'en';
+    })();
+  </script>
+</Base>
+
+<style>
+  .lost {
+    padding-block: clamp(3rem, 9vw, 7rem) var(--section);
+  }
+
+  .lost__copy[hidden] {
+    display: none;
+  }
+
+  /* The zero of 404 is the bow tie. */
+  .lost__number {
+    display: flex;
+    align-items: center;
+    gap: 0.08em;
+    font-family: var(--font-display);
+    font-size: clamp(6rem, 24vw, 17rem);
+    line-height: 0.9;
+    letter-spacing: -0.03em;
+  }
+
+  .lost__bow {
+    display: block;
+    flex: none;
+    width: 0.62em;
+    color: var(--noeud);
+  }
+
+  .lost__title {
+    margin-top: clamp(1.5rem, 3vw, 2.5rem);
+    font-size: var(--step-3);
+  }
+
+  .lost__text {
+    margin-top: 1rem;
+    max-width: var(--measure);
+    color: var(--muted);
+  }
+
+  .lost__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.9rem 2rem;
+    margin-top: 2.25rem;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .lost__bow {
+      animation: bow-settle 1.4s var(--ease) 0.3s both;
+    }
+  }
+
+  @keyframes bow-settle {
+    0% {
+      rotate: -28deg;
+      opacity: 0;
+    }
+    45% {
+      rotate: 12deg;
+      opacity: 1;
+    }
+    70% {
+      rotate: -5deg;
+    }
+    100% {
+      rotate: 0deg;
+    }
+  }
+</style>

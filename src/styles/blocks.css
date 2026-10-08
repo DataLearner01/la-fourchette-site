@@ -1,0 +1,107 @@
+/* Blocks shared by several pages. */
+
+/* ---------- A picture beside a short list of drinks ---------- */
+
+.bar__grid {
+  display: grid;
+  gap: 3rem var(--col-gap);
+}
+
+.bar__text {
+  margin-top: 1.75rem;
+  max-width: var(--measure);
+  color: var(--muted);
+}
+
+.picks {
+  margin-top: clamp(2.25rem, 4vw, 3.25rem);
+}
+
+.picks__label {
+  margin-bottom: 0.5rem;
+  font-size: var(--step--1);
+  color: var(--muted);
+}
+
+.bar__link {
+  display: inline-block;
+  margin-top: 2rem;
+}
+
+.bar__figure {
+  width: min(100%, 24rem);
+}
+
+@media (min-width: 60rem) {
+  .bar__grid {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    align-items: center;
+  }
+
+  .bar__figure {
+    grid-column: 1 / span 4;
+    grid-row: 1;
+    width: 100%;
+  }
+
+  .bar__copy {
+    grid-column: 6 / span 7;
+    grid-row: 1;
+  }
+}
+
+/* ---------- Reservation band, at the foot of most pages ---------- */
+
+.reserve {
+  border-top: 1px solid var(--rule);
+}
+
+.reserve__grid {
+  display: grid;
+  gap: 2rem var(--col-gap);
+}
+
+.reserve__title {
+  font-size: var(--step-4);
+  line-height: 0.98;
+  letter-spacing: -0.02em;
+}
+
+.reserve__text {
+  max-width: var(--measure);
+  color: var(--muted);
+}
+
+.reserve__actions {
+  margin-top: 2rem;
+}
+
+.reserve__services {
+  margin-top: 2.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--rule);
+  max-width: var(--measure);
+  font-size: var(--step--1);
+  color: var(--muted);
+}
+
+.reserve__services strong {
+  display: block;
+  font-weight: 400;
+  color: var(--fg);
+}
+
+@media (min-width: 60rem) {
+  .reserve__grid {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    align-items: end;
+  }
+
+  .reserve__title {
+    grid-column: 1 / span 7;
+  }
+
+  .reserve__body {
+    grid-column: 8 / span 5;
+  }
+}

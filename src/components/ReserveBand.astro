@@ -1,0 +1,30 @@
+---
+import { routes, type Lang } from '../data/routes';
+import { common, demo } from '../data/site';
+import { reserveBand } from '../content/shared';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = reserveBand[lang];
+const c = common[lang];
+---
+
+<section class="section reserve" data-theme="dark">
+  <div class="wrap reserve__grid">
+    <h2 class="reserve__title">{t.title}</h2>
+    <div class="reserve__body">
+      <p class="reserve__text">{t.text}</p>
+      <div class="actions reserve__actions">
+        <a class="btn" href={routes.reservation[lang]}>{t.primary}</a>
+        <a class="btn btn--quiet" href={demo.whatsapp}>{c.whatsapp}</a>
+        <a class="btn btn--quiet" href={demo.phone.href}>{c.call}</a>
+      </div>
+      <p class="reserve__services">
+        <strong>{t.servicesLabel}</strong>
+        {t.services}
+      </p>
+    </div>
+  </div>
+</section>

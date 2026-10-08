@@ -1,0 +1,69 @@
+---
+import Inner from './Inner.astro';
+import Frame from '../components/Frame.astro';
+import PriceRow from '../components/PriceRow.astro';
+import ReserveBand from '../components/ReserveBand.astro';
+import { routes, type Lang } from '../data/routes';
+import { formatPrice } from '../data/format';
+import { pages } from '../content/pages';
+
+import chairs from '../assets/graded/lounge-fauteuils.jpg';
+import aquarium from '../assets/graded/lounge-aquarium.jpg';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = pages.lounge[lang];
+---
+
+<Inner
+  lang={lang}
+  page="lounge"
+  theme="dark"
+  picture={{ src: chairs, alt: t.views[0].alt, shape: 'arc-right', position: '42% 50%' }}
+>
+  <section class="section" data-theme="light">
+    <div class="wrap lead-grid">
+      <div class="lead-grid__intro">
+        <h2 class="title-2">{t.about.title}</h2>
+        <p class="lead-grid__text">{t.about.text}</p>
+      </div>
+      <ol class="moments" role="list">
+        {
+          t.moments.map((moment) => (
+            <li>
+              <h3 class="moments__name">{moment.name}</h3>
+              <p class="moments__text">{moment.text}</p>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  <section class="section" data-theme="dark">
+    <div class="wrap bar__grid">
+      <div class="bar__copy">
+        <h2 class="title-2">{t.order.title}</h2>
+        <div class="picks">
+          <p class="picks__label" id="lounge-picks">{t.order.listLabel}</p>
+          <ul role="list" aria-labelledby="lounge-picks">
+            {
+              t.order.picks.map((pick) => (
+                <PriceRow name={pick.name} note={pick.note || undefined} price={formatPrice(pick.price)} />
+              ))
+            }
+          </ul>
+        </div>
+        <a class="link bar__link" href={routes.bar[lang]}>{t.order.link}</a>
+      </div>
+      <figure class="bar__figure">
+        <Frame src={aquarium} alt={t.views[1].alt} ratio={[4, 5]} sizes="(min-width: 60rem) 30vw, 24rem" />
+        <figcaption>{t.views[1].caption}</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <ReserveBand lang={lang} />
+</Inner>

@@ -1,0 +1,68 @@
+---
+// Shared shell for the five inner pages: an opening screen, then the page's own sections.
+import '../styles/inner.css';
+import type { ImageMetadata } from 'astro';
+import Base from '../layouts/Base.astro';
+import Frame from '../components/Frame.astro';
+import type { Lang, PageKey } from '../data/routes';
+import { pages } from '../content/pages';
+
+interface Props {
+  lang: Lang;
+  page: Exclude<PageKey, 'home'>;
+  theme?: 'dark' | 'light';
+  // A photo beside the title (pages that have a strong one)...
+  picture?: { src: ImageMetadata; alt: string; shape?: 'arc-left' | 'arc-right'; position?: string };
+  // ...or the title set very large, with a line of words under it (pages that do not).
+  words?: readonly string[];
+}
+const { lang, page, theme = 'dark', picture, words } = Astro.props;
+const t = pages[page][lang];
+const variant = picture ? 'photo' : words ? 'type' : 'plain';
+---
+
+<Base lang={lang} page={page} title={t.metaTitle} description={t.lede}>
+  <section class:list={['page-intro', `page-intro--${variant}`]} data-theme={theme}>
+    <div class:list={['wrap', { 'page-intro__grid': variant === 'photo' }]}>
+      <div class="page-intro__copy">
+        <h1 class="page-intro__title" style={`--letters:${t.title.length}`}>
+          <span class="page-intro__mask"><span>{t.title}</span></span>
+        </h1>
+        {variant !== 'type' && <p class="page-intro__lede">{t.lede}</p>}
+      </div>
+
+      {
+        picture && (
+          <div class="page-intro__figure">
+            <Frame
+              src={picture.src}
+              alt={picture.alt}
+              shape={picture.shape ?? 'arc-right'}
+              ratio={[1, 1]}
+              position={picture.position}
+              sizes="(min-width: 60rem) 38vw, 92vw"
+              eager
+              reveal={false}
+              drift={false}
+              echo
+            />
+          </div>
+        )
+      }
+
+      {
+        words && (
+          <div class="page-intro__foot">
+            <p class="page-intro__lede">{t.lede}</p>
+            <ul class:list={['page-intro__words', { 'page-intro__words--long': words.some((word) => word.length > 14) }]} role="list">
+              {words.map((word) => (
+                <li>{word}</li>
+              ))}
+            </ul>
+          </div>
+        )
+      }
+    </div>
+  </section>
+  <slot />
+</Base>

@@ -1,0 +1,341 @@
+---
+import '../styles/forms.css';
+import Inner from './Inner.astro';
+import Frame from '../components/Frame.astro';
+import type { Lang } from '../data/routes';
+import { common, demo, venue } from '../data/site';
+import { pages } from '../content/pages';
+import { mapsUrl } from '../content/shared';
+
+import entrance from '../assets/graded/hero-entree.jpg';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = pages.reservation[lang];
+const f = t.form;
+const c = common[lang];
+
+// DEMO time slots, every half hour within the demo opening hours.
+const slots = (from: number, to: number) =>
+  Array.from({ length: (to - from) * 2 + 1 }, (_, i) => {
+    const minutes = from * 60 + i * 30;
+    return `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${minutes % 60 === 0 ? '00' : '30'}`;
+  });
+const lunchSlots = slots(12, 14).concat('14:30');
+const dinnerSlots = slots(19, 22).concat('22:30');
+const guestCounts = Array.from({ length: 12 }, (_, i) => i + 1);
+
+// 20:30 reads "20 h 30" in French and "8:30 pm" in English.
+const slotLabel = (slot: string) => {
+  const [hour, minutes] = slot.split(':');
+  if (lang === 'fr') return minutes === '00' ? `${Number(hour)} h` : `${Number(hour)} h ${minutes}`;
+  return `${Number(hour) % 12 || 12}:${minutes} ${Number(hour) < 12 ? 'am' : 'pm'}`;
+};
+---
+
+<Inner lang={lang} page="reservation" theme="light">
+  <section class="booking" data-theme="light">
+    <div class="wrap booking__grid">
+      <div class="booking__main">
+        <h2 class="title-3" id="reserver">{f.title}</h2>
+
+        <form
+          class="form"
+          data-booking
+          novalidate
+          data-lang={lang}
+          data-whatsapp={demo.whatsapp}
+          data-summary={f.summary}
+          data-error-required={f.errors.required}
+          data-error-date={f.errors.date}
+          data-error-phone={f.errors.phone}
+          data-error-email={f.errors.email}
+        >
+          <div class="field">
+            <label for="booking-date">{f.date}</label>
+            <input id="booking-date" name="date" type="date" required aria-describedby="booking-date-error" />
+            <p class="field__error" id="booking-date-error" role="alert"></p>
+          </div>
+
+          <div class="field">
+            <label for="booking-time">{f.time}</label>
+            <select id="booking-time" name="time" required aria-describedby="booking-time-error">
+              <option value="">{f.timePlaceholder}</option>
+              <optgroup label={f.lunch}>
+                {lunchSlots.map((slot) => <option value={slot}>{slotLabel(slot)}</option>)}
+              </optgroup>
+              <optgroup label={f.dinner}>
+                {dinnerSlots.map((slot) => <option value={slot}>{slotLabel(slot)}</option>)}
+              </optgroup>
+            </select>
+            <p class="field__error" id="booking-time-error" role="alert"></p>
+          </div>
+
+          <div class="field">
+            <label for="booking-guests">{f.guests}</label>
+            <select id="booking-guests" name="guests" required aria-describedby="booking-guests-hint">
+              {
+                guestCounts.map((count) => (
+                  <option value={count} selected={count === 2}>
+                    {count === 1 ? f.guestsOne : f.guestsMany.replace('{n}', String(count))}
+                  </option>
+                ))
+              }
+              <option value="13+">{f.guestsMore}</option>
+            </select>
+            <p class="field__hint" id="booking-guests-hint" data-group-hint hidden>{f.groupHint}</p>
+          </div>
+
+          <fieldset class="field field--choices">
+            <legend>{f.seating}</legend>
+            <div class="choices">
+              {
+                f.seatingOptions.map((option, index) => (
+                  <label class="choice">
+                    <input type="radio" name="seating" value={option} checked={index === 0} />
+                    <span>{option}</span>
+                  </label>
+                ))
+              }
+            </div>
+          </fieldset>
+
+          <div class="field">
+            <label for="booking-name">{f.name}</label>
+            <input
+              id="booking-name"
+              name="name"
+              type="text"
+              autocomplete="name"
+              required
+              aria-describedby="booking-name-error"
+            />
+            <p class="field__error" id="booking-name-error" role="alert"></p>
+          </div>
+
+          <div class="field">
+            <label for="booking-phone">{f.phone}</label>
+            <input
+              id="booking-phone"
+              name="phone"
+              type="tel"
+              autocomplete="tel"
+              inputmode="tel"
+              pattern="[0-9+\(\) .\-]{8,}"
+              required
+              aria-describedby="booking-phone-error"
+            />
+            <p class="field__error" id="booking-phone-error" role="alert"></p>
+          </div>
+
+          <div class="field field--wide">
+            <label for="booking-email">{f.email}</label>
+            <input
+              id="booking-email"
+              name="email"
+              type="email"
+              autocomplete="email"
+              aria-describedby="booking-email-error"
+            />
+            <p class="field__error" id="booking-email-error" role="alert"></p>
+          </div>
+
+          <div class="field field--wide">
+            <label for="booking-message">{f.message}</label>
+            <textarea id="booking-message" name="message" rows="3" placeholder={f.messagePlaceholder}></textarea>
+          </div>
+
+          <div class="field field--wide">
+            <button class="btn" type="submit">{f.submit}</button>
+          </div>
+        </form>
+
+        <div class="confirm" data-confirm hidden>
+          <h2 class="title-3" tabindex="-1" data-confirm-title>{t.confirm.title}</h2>
+          <p class="confirm__text">{t.confirm.text}</p>
+          <dl class="confirm__list" data-confirm-list></dl>
+          <p class="confirm__demo">{t.confirm.demo}</p>
+          <div class="actions">
+            <a class="btn" href={demo.whatsapp} data-confirm-whatsapp>{t.confirm.whatsapp}</a>
+            <button class="btn btn--quiet" type="button" data-confirm-edit>{t.confirm.edit}</button>
+          </div>
+        </div>
+      </div>
+
+      <aside class="booking__aside">
+        <Frame
+          src={entrance}
+          alt={t.direct.alt}
+          shape="arc-right"
+          ratio={[4, 3]}
+          position="50% 45%"
+          sizes="(min-width: 60rem) 36vw, 92vw"
+        />
+
+        <h2 class="booking__label no-cast">{t.direct.title}</h2>
+        <div class="actions">
+          <a class="btn btn--quiet" href={demo.whatsapp}>{c.whatsapp}</a>
+          <a class="btn btn--quiet" href={demo.phone.href}>{demo.phone.display}</a>
+        </div>
+
+        <h2 class="booking__label no-cast">{c.address}</h2>
+        <address>
+          {venue.street}<br />
+          {venue.city}, {venue.country[lang]}
+        </address>
+        <a class="link booking__map" href={mapsUrl} target="_blank" rel="noopener noreferrer">
+          {t.direct.mapLink}
+        </a>
+
+        <h2 class="booking__label no-cast">{c.hours}</h2>
+        <dl class="booking__hours">
+          {
+            demo.hours.map((slot) => (
+              <div>
+                <dt>{slot.label[lang]}</dt>
+                <dd>{slot.value[lang]}</dd>
+              </div>
+            ))
+          }
+        </dl>
+      </aside>
+    </div>
+  </section>
+
+  <section class="section" data-theme="dark">
+    <div class="wrap">
+      <h2 class="title-2 know__title">{t.also.title}</h2>
+      <div class="know know--four">
+        {
+          t.also.items.map((item) => (
+            <div class="know__group">
+              <h3 class="know__name">{item.name}</h3>
+              <p>{item.text}</p>
+            </div>
+          ))
+        }
+      </div>
+      <p class="know__note">{t.also.note}</p>
+    </div>
+  </section>
+</Inner>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>('[data-booking]');
+  const confirm = document.querySelector<HTMLElement>('[data-confirm]');
+
+  if (form && confirm) {
+    const data = form.dataset;
+    const dateInput = form.elements.namedItem('date') as HTMLInputElement;
+    const guests = form.elements.namedItem('guests') as HTMLSelectElement;
+    const groupHint = form.querySelector<HTMLElement>('[data-group-hint]')!;
+    const list = confirm.querySelector<HTMLElement>('[data-confirm-list]')!;
+    const title = confirm.querySelector<HTMLElement>('[data-confirm-title]')!;
+    const whatsapp = confirm.querySelector<HTMLAnchorElement>('[data-confirm-whatsapp]')!;
+
+    // Bookings start today.
+    const today = new Date();
+    const pad = (value: number) => String(value).padStart(2, '0');
+    dateInput.min = `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`;
+
+    guests.addEventListener('change', () => {
+      groupHint.hidden = guests.value !== '13+';
+    });
+
+    type Field = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
+    const fields = [...form.querySelectorAll<Field>('input, select, textarea')];
+
+    function messageFor(field: Field) {
+      const validity = field.validity;
+      if (validity.valid) return '';
+      if (validity.valueMissing) return data.errorRequired!;
+      if (field.name === 'date') return data.errorDate!;
+      if (field.name === 'phone') return data.errorPhone!;
+      if (field.name === 'email') return data.errorEmail!;
+      return data.errorRequired!;
+    }
+
+    function check(field: Field) {
+      const message = messageFor(field);
+      const slot = field.id ? form!.querySelector<HTMLElement>(`#${field.id}-error`) : null;
+      if (slot) slot.textContent = message;
+      field.setAttribute('aria-invalid', message ? 'true' : 'false');
+      return !message;
+    }
+
+    fields.forEach((field) => {
+      field.addEventListener('blur', () => field.value && check(field));
+      field.addEventListener('input', () => field.getAttribute('aria-invalid') === 'true' && check(field));
+    });
+
+    const labelOf = (field: Field) =>
+      form.querySelector(`label[for="${field.id}"]`)?.textContent?.trim() ??
+      field.closest('fieldset')?.querySelector('legend')?.textContent?.trim() ??
+      field.name;
+
+    const optionText = (select: HTMLSelectElement) => select.selectedOptions[0]?.textContent?.trim() ?? '';
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const invalid = fields.filter((field) => !check(field));
+      if (invalid.length) {
+        invalid[0].focus();
+        return;
+      }
+
+      const values = new FormData(form);
+      const date = new Date(`${values.get('date')}T12:00:00`);
+      const dateText = new Intl.DateTimeFormat(data.lang, {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+      }).format(date);
+      const timeText = optionText(form.elements.namedItem('time') as HTMLSelectElement);
+      const guestsText = optionText(guests);
+
+      // What was entered, read back with the form's own labels.
+      const rows: [string, string][] = [
+        [labelOf(dateInput), dateText],
+        [labelOf(form.elements.namedItem('time') as Field), timeText],
+        [labelOf(guests), guestsText],
+        [labelOf(form.querySelector<Field>('input[name="seating"]')!), String(values.get('seating'))],
+        [labelOf(form.elements.namedItem('name') as Field), String(values.get('name'))],
+        [labelOf(form.elements.namedItem('phone') as Field), String(values.get('phone'))],
+      ];
+      const message = String(values.get('message') ?? '').trim();
+      if (message) rows.push([labelOf(form.elements.namedItem('message') as Field), message]);
+
+      list.replaceChildren(
+        ...rows.map(([term, value]) => {
+          const row = document.createElement('div');
+          const dt = document.createElement('dt');
+          const dd = document.createElement('dd');
+          dt.textContent = term.replace(/\s*\?$/, '');
+          dd.textContent = value;
+          row.append(dt, dd);
+          return row;
+        }),
+      );
+
+      const summary = data
+        .summary!.replace('{guests}', guestsText.toLowerCase())
+        .replace('{date}', dateText)
+        .replace('{time}', timeText)
+        .replace('{name}', String(values.get('name')));
+      whatsapp.href = `${data.whatsapp}?text=${encodeURIComponent(message ? `${summary} ${message}` : summary)}`;
+
+      form.hidden = true;
+      confirm.hidden = false;
+      title.focus();
+      confirm.scrollIntoView({ block: 'nearest' });
+    });
+
+    confirm.querySelector('[data-confirm-edit]')?.addEventListener('click', () => {
+      confirm.hidden = true;
+      form.hidden = false;
+      dateInput.focus();
+    });
+  }
+</script>

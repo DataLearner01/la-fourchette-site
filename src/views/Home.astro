@@ -1,0 +1,151 @@
+---
+import '../styles/home.css';
+import Base from '../layouts/Base.astro';
+import Frame from '../components/Frame.astro';
+import Scene from '../components/Scene.astro';
+import PriceRow from '../components/PriceRow.astro';
+import ReserveBand from '../components/ReserveBand.astro';
+import { routes, type Lang } from '../data/routes';
+import { home } from '../content/home';
+
+import magret from '../assets/graded/magret-plantain.jpg';
+import avocat from '../assets/graded/avocat-crevettes.jpg';
+import cocktail from '../assets/graded/cocktail.jpg';
+import salle from '../assets/graded/salle-rouge.jpg';
+import lounge from '../assets/graded/lounge-fauteuils.jpg';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = home[lang];
+---
+
+<Base lang={lang} page="home" title={t.meta.title} description={t.meta.description}>
+  <Scene
+    lang={lang}
+    title={t.hero.title}
+    hint={t.hero.hint}
+    tagline={t.hero.tagline}
+    primary={t.hero.primary}
+    secondary={t.hero.secondary}
+    entranceAlt={t.hero.entranceAlt}
+    roomAlt={t.hero.roomAlt}
+  />
+
+  <div class="facts" data-theme="dark">
+    <div class="wrap facts__row">
+      <p>{t.hero.factAddress}</p>
+      <p>{t.hero.factHours}</p>
+    </div>
+  </div>
+
+  <section class="section" data-theme="light">
+    <div class="wrap cuisine__grid">
+      <div class="cuisine__intro">
+        <h2 class="title-2">{t.cuisine.title}</h2>
+        <p class="cuisine__text">{t.cuisine.text}</p>
+        <a class="link cuisine__link" href={routes.menu[lang]}>{t.cuisine.link}</a>
+      </div>
+
+      <figure class="cuisine__plate--a">
+        <Frame
+          src={magret}
+          alt={t.cuisine.plates[0].alt}
+          ratio={[4, 3]}
+          sizes="(min-width: 60rem) 38vw, 92vw"
+        />
+        <figcaption>{t.cuisine.plates[0].caption}</figcaption>
+      </figure>
+
+      <ul class="origins cuisine__origins" role="list">
+        {
+          t.cuisine.origins.map((origin) => (
+            <li>
+              <h3 class="origins__name">{origin.name}</h3>
+              <p class="origins__dishes">{origin.dishes}</p>
+            </li>
+          ))
+        }
+      </ul>
+
+      <figure class="cuisine__plate--b">
+        <Frame
+          src={avocat}
+          alt={t.cuisine.plates[1].alt}
+          ratio={[1, 1]}
+          position="50% 50%"
+          sizes="(min-width: 60rem) 30vw, 22rem"
+        />
+        <figcaption>{t.cuisine.plates[1].caption}</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="section" data-theme="dark">
+    <div class="wrap bar__grid">
+      <div class="bar__copy">
+        <h2 class="title-2">{t.bar.title}</h2>
+        <p class="bar__text">{t.bar.text}</p>
+
+        <div class="picks">
+          <p class="picks__label" id="picks-label">{t.bar.listLabel}</p>
+          <ul role="list" aria-labelledby="picks-label">
+            {
+              t.bar.picks.map((pick) => (
+                <PriceRow name={pick.name} note={pick.note} price={pick.price} />
+              ))
+            }
+          </ul>
+        </div>
+
+        <a class="link bar__link" href={routes.bar[lang]}>{t.bar.link}</a>
+      </div>
+
+      <figure class="bar__figure">
+        <Frame
+          src={cocktail}
+          alt={t.bar.alt}
+          ratio={[4, 5]}
+          sizes="(min-width: 60rem) 30vw, 24rem"
+        />
+      </figure>
+    </div>
+  </section>
+
+  <section class="section" data-theme="light">
+    <div class="wrap">
+      <h2 class="title-2 rooms__title">{t.rooms.title}</h2>
+      <div class="rooms__pair">
+        <article>
+          <Frame
+            src={salle}
+            alt={t.rooms.room.alt}
+            shape="arc-left"
+            ratio={[1, 1]}
+            position="45% 50%"
+            sizes="(min-width: 44rem) 44vw, 92vw"
+          />
+          <h3 class="rooms__name">{t.rooms.room.name}</h3>
+          <p class="rooms__text">{t.rooms.room.text}</p>
+          <a class="link rooms__link" href={routes.house[lang]}>{t.rooms.room.link}</a>
+        </article>
+        <article>
+          <Frame
+            src={lounge}
+            alt={t.rooms.lounge.alt}
+            shape="arc-right"
+            ratio={[1, 1]}
+            position="45% 50%"
+            sizes="(min-width: 44rem) 44vw, 92vw"
+          />
+          <h3 class="rooms__name">{t.rooms.lounge.name}</h3>
+          <p class="rooms__text">{t.rooms.lounge.text}</p>
+          <a class="link rooms__link" href={routes.lounge[lang]}>{t.rooms.lounge.link}</a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <ReserveBand lang={lang} />
+</Base>

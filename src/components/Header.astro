@@ -1,0 +1,404 @@
+---
+import Logo from './Logo.astro';
+import BowTie from './BowTie.astro';
+import LangSwitch from './LangSwitch.astro';
+import { pageOrder, routes, navLabels, type Lang, type PageKey } from '../data/routes';
+import { common, demo, venue } from '../data/site';
+
+interface Props {
+  lang: Lang;
+  // null on pages outside the six tabs, such as the 404 page.
+  page: PageKey | null;
+}
+const { lang, page } = Astro.props;
+const t = common[lang];
+const homeLabel = `${venue.name}, ${navLabels.home[lang]}`;
+---
+
+<header class="site-header" data-theme="dark">
+  <div class="site-header__inner wrap">
+    <a class="site-header__logo" href={routes.home[lang]} aria-label={homeLabel}>
+      <Logo />
+    </a>
+
+    <nav class="primary-nav" aria-label={t.navLabel}>
+      <ul role="list">
+        {
+          pageOrder.map((key) => (
+            <li>
+              <a
+                href={routes[key][lang]}
+                aria-current={key === page ? 'page' : undefined}
+                class:list={{ 'primary-nav__reserve': key === 'reservation' }}
+              >
+                {navLabels[key][lang]}
+                {key === page && (
+                  // The bow tie marks the open tab and glides to the next one on navigation.
+                  <span class="nav-marker">
+                    <BowTie />
+                  </span>
+                )}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="site-header__tools">
+      <div class="site-header__lang">
+        <LangSwitch lang={lang} page={page} />
+      </div>
+      <a class="btn site-header__reserve" href={routes.reservation[lang]}>{t.reserveShort}</a>
+      <button
+        type="button"
+        class="menu-toggle"
+        aria-haspopup="dialog"
+        aria-controls="site-menu"
+        data-menu-open
+      >
+        {t.menuOpen}
+      </button>
+    </div>
+  </div>
+</header>
+
+<dialog class="site-menu" id="site-menu" aria-label={t.menuTitle} data-theme="dark">
+  <div class="site-menu__bar wrap">
+    <a class="site-header__logo" href={routes.home[lang]} aria-label={homeLabel}>
+      <Logo />
+    </a>
+    <button type="button" class="menu-toggle" data-menu-close>{t.menuClose}</button>
+  </div>
+
+  <nav class="site-menu__nav wrap" aria-label={t.navLabel}>
+    <ul role="list">
+      {
+        pageOrder.map((key, i) => (
+          <li style={`--i:${i}`}>
+            <a href={routes[key][lang]} aria-current={key === page ? 'page' : undefined}>
+              <span>{navLabels[key][lang]}</span>
+              {key === page && (
+                <span class="site-menu__marker">
+                  <BowTie />
+                </span>
+              )}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </nav>
+
+  <div class="site-menu__foot wrap">
+    <div class="site-menu__contact">
+      <a class="link" href={demo.phone.href}>{demo.phone.display}</a>
+      <a class="link" href={demo.whatsapp}>WhatsApp</a>
+    </div>
+    <LangSwitch lang={lang} page={page} />
+  </div>
+</dialog>
+
+<script>
+  const dialog = document.getElementById('site-menu') as HTMLDialogElement | null;
+
+  if (dialog) {
+    document.querySelector('[data-menu-open]')?.addEventListener('click', () => dialog.showModal());
+    dialog.querySelector('[data-menu-close]')?.addEventListener('click', () => dialog.close());
+
+    // The menu only exists on small screens.
+    window.matchMedia('(min-width: 72rem)').addEventListener('change', (event) => {
+      if (event.matches && dialog.open) dialog.close();
+    });
+
+    // Coming back with the browser's back button should not find the menu still open.
+    window.addEventListener('pageshow', (event) => {
+      if (event.persisted && dialog.open) dialog.close();
+    });
+  }
+
+  document.querySelectorAll<HTMLAnchorElement>('[data-set-lang]').forEach((link) => {
+    link.addEventListener('click', () => {
+      // Keep the open menu category (the #hash) when changing language.
+      if (location.hash) link.href = link.pathname + location.hash;
+      try {
+        localStorage.setItem('lf-lang', link.dataset.setLang ?? '');
+      } catch {
+        // Storage can be unavailable in private windows; the link still works.
+      }
+    });
+  });
+</script>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    border-bottom: 1px solid var(--rule);
+    view-transition-name: site-header;
+  }
+
+  .site-header__inner,
+  .site-menu__bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    height: var(--header-h);
+  }
+
+  .site-header__logo {
+    display: inline-flex;
+    text-decoration: none;
+    flex: none;
+  }
+
+  .site-header__tools {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .site-header__lang,
+  .primary-nav {
+    display: none;
+  }
+
+  /* Phones have the action bar at the bottom of the screen instead. */
+  .site-header__reserve {
+    display: none;
+    min-height: 2.6rem;
+    padding: 0.4rem 0.95rem;
+  }
+
+  @media (min-width: 48rem) {
+    .site-header__reserve {
+      display: inline-flex;
+    }
+  }
+
+  .menu-toggle {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.6rem;
+    padding: 0.4rem 0.95rem;
+    border: 1px solid var(--rule-strong);
+    background: transparent;
+    font-size: var(--step--1);
+    font-weight: 500;
+    letter-spacing: 0.03em;
+    cursor: pointer;
+    transition: border-color 0.25s;
+  }
+
+  .menu-toggle:hover {
+    border-color: var(--fg);
+  }
+
+  /* ----- Desktop: all six tabs in the bar ----- */
+
+  @media (min-width: 72rem) {
+    .site-header__reserve,
+    .menu-toggle {
+      display: none;
+    }
+
+    .site-header__lang,
+    .primary-nav {
+      display: block;
+    }
+
+    .primary-nav ul {
+      display: flex;
+      align-items: center;
+      gap: clamp(1.25rem, 2.2vw, 2.25rem);
+    }
+
+    .primary-nav a {
+      position: relative;
+      display: inline-block;
+      padding-block: 0.6rem;
+      font-size: 0.97rem;
+      font-weight: 400;
+      letter-spacing: 0.02em;
+      text-decoration: none;
+      color: var(--muted);
+      transition:
+        color 0.25s,
+        border-color 0.25s;
+    }
+
+    .primary-nav a:hover,
+    .primary-nav a[aria-current='page'] {
+      color: var(--fg);
+    }
+
+    .primary-nav a.primary-nav__reserve {
+      padding: 0.6rem 1.1rem;
+      border: 1px solid var(--rule-strong);
+      color: var(--fg);
+    }
+
+    .primary-nav a.primary-nav__reserve:hover,
+    .primary-nav a.primary-nav__reserve[aria-current='page'] {
+      border-color: var(--noeud);
+    }
+
+    /* A faint silver bow tie rises under the tab the pointer is on. */
+    .primary-nav a:not([aria-current='page']):not(.primary-nav__reserve)::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      bottom: -0.35rem;
+      width: 1.15rem;
+      height: 0.575rem;
+      translate: -50% 0.3rem;
+      background: var(--argent);
+      -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 12'%3E%3Cpath d='M12 6 1.6.9Q0 6 1.6 11.1ZM12 6 22.4.9Q24 6 22.4 11.1Z'/%3E%3Crect x='10.1' y='3.6' width='3.8' height='4.8' rx='1.2'/%3E%3C/svg%3E") center / contain no-repeat;
+      mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 12'%3E%3Cpath d='M12 6 1.6.9Q0 6 1.6 11.1ZM12 6 22.4.9Q24 6 22.4 11.1Z'/%3E%3Crect x='10.1' y='3.6' width='3.8' height='4.8' rx='1.2'/%3E%3C/svg%3E") center / contain no-repeat;
+      opacity: 0;
+      transition:
+        opacity 0.3s ease,
+        translate 0.45s var(--ease);
+    }
+
+    .primary-nav a:not([aria-current='page']):not(.primary-nav__reserve):hover::after {
+      opacity: 0.55;
+      translate: -50% 0;
+    }
+
+    .nav-marker {
+      position: absolute;
+      left: 50%;
+      bottom: -0.35rem;
+      width: 1.15rem;
+      translate: -50% 0;
+      color: var(--noeud);
+      line-height: 0;
+      view-transition-name: nav-marker;
+    }
+
+    .primary-nav__reserve .nav-marker {
+      bottom: -0.3rem;
+      padding-inline: 0.3rem;
+      width: 1.75rem;
+      background: var(--bg);
+    }
+  }
+
+  /* ----- Small screens: full-screen menu ----- */
+
+  .site-menu {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    max-width: none;
+    height: 100dvh;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    overflow-y: auto;
+    opacity: 0;
+    transition:
+      opacity 0.3s ease,
+      overlay 0.3s allow-discrete,
+      display 0.3s allow-discrete;
+  }
+
+  .site-menu[open] {
+    display: flex;
+    flex-direction: column;
+    opacity: 1;
+  }
+
+  @starting-style {
+    .site-menu[open] {
+      opacity: 0;
+    }
+  }
+
+  .site-menu::backdrop {
+    background: #000;
+  }
+
+  .site-menu__bar {
+    flex: none;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .site-menu__nav {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    padding-block: 1.5rem;
+  }
+
+  .site-menu__nav ul {
+    width: 100%;
+  }
+
+  .site-menu__nav li + li {
+    border-top: 1px solid var(--rule);
+  }
+
+  .site-menu__nav a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-block: 0.85rem;
+    font-family: var(--font-display);
+    font-size: clamp(1.75rem, 7.6vw, 2.75rem);
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+    text-decoration: none;
+  }
+
+  .site-menu__nav a[aria-current='page'] {
+    font-style: italic;
+  }
+
+  .site-menu__marker {
+    flex: none;
+    width: 1.6rem;
+    color: var(--noeud);
+    line-height: 0;
+  }
+
+  .site-menu__foot {
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-block: 1rem 1.5rem;
+    border-top: 1px solid var(--rule);
+    font-size: var(--step--1);
+  }
+
+  .site-menu__contact {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.25rem;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .site-menu[open] .site-menu__nav li {
+      animation: menu-rise 0.6s var(--ease) both;
+      animation-delay: calc(var(--i) * 45ms + 60ms);
+    }
+  }
+
+  @keyframes menu-rise {
+    from {
+      opacity: 0;
+      translate: 0 0.9rem;
+    }
+  }
+
+  :global(html:has(.site-menu[open])) {
+    overflow: hidden;
+  }
+</style>

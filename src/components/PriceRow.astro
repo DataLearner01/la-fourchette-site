@@ -1,0 +1,78 @@
+---
+// One line of a menu: name, optional detail, dotted leader, price.
+interface Props {
+  name: string;
+  note?: string;
+  tag?: string;
+  price?: string;
+}
+const { name, note, tag, price } = Astro.props;
+---
+
+<li class="price-row">
+  <span class="price-row__text">
+    <span class="price-row__name cast">{name}</span>
+    {tag && <span class="price-row__tag">{tag}</span>}
+    {note && <span class="price-row__note">{note}</span>}
+  </span>
+  {
+    price && (
+      <>
+        <span class="price-row__leader" aria-hidden="true" />
+        <span class="price-row__price">{price}</span>
+      </>
+    )
+  }
+</li>
+
+<style>
+  .price-row {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    padding-block: 0.8rem;
+    break-inside: avoid;
+  }
+
+  .price-row__name {
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+    line-height: 1.2;
+  }
+
+  .price-row__tag {
+    margin-left: 0.5rem;
+    font-size: var(--step--1);
+    font-style: italic;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+
+  .price-row__note {
+    display: block;
+    margin-top: 0.15rem;
+    font-size: var(--step--1);
+    line-height: 1.4;
+    color: var(--muted);
+  }
+
+  .price-row__leader {
+    flex: 1;
+    min-width: 1.5rem;
+    border-bottom: 1px dotted var(--rule-strong);
+    translate: 0 -0.3em;
+    transition: border-color 0.3s ease;
+  }
+
+  /* The dotted line picks up the accent on the row the pointer is reading. */
+  @media (hover: hover) {
+    .price-row:hover .price-row__leader {
+      border-bottom-color: var(--accent);
+    }
+  }
+
+  .price-row__price {
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+</style>

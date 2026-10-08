@@ -1,0 +1,183 @@
+/* Reservation form: underlined fields, labels above, errors beneath. */
+
+.form {
+  display: grid;
+  gap: 1.9rem var(--col-gap);
+  margin-top: 2.25rem;
+}
+
+.form[hidden],
+.confirm[hidden] {
+  display: none;
+}
+
+.field {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.field label,
+.field legend {
+  display: block;
+  padding: 0;
+  margin-bottom: 0.3rem;
+  font-size: var(--step--1);
+  color: var(--muted);
+  transition: color 0.25s ease;
+}
+
+/* The label of the field being filled in steps forward. */
+.field:focus-within > label,
+.field:focus-within > legend {
+  color: var(--fg);
+}
+
+.field input:not([type='radio']),
+.field select,
+.field textarea {
+  display: block;
+  width: 100%;
+  min-height: 3rem;
+  padding: 0.55rem 0;
+  border: 0;
+  border-bottom: 1px solid var(--rule-strong);
+  border-radius: 0;
+  background-color: transparent;
+  color: var(--fg);
+  font: inherit;
+  /* 16px or more, so phones do not zoom in on focus. */
+  font-size: max(1rem, var(--step-0));
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+
+.field input:not([type='radio']),
+.field select {
+  height: 3rem;
+}
+
+.field textarea {
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.field select {
+  appearance: none;
+  padding-right: 1.75rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5l5-5' fill='none' stroke='%23131112' stroke-width='1.4'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.25rem center;
+  background-size: 0.75rem;
+  cursor: pointer;
+}
+
+.field ::placeholder {
+  color: var(--muted);
+  opacity: 0.8;
+}
+
+.field input:not([type='radio']):focus-visible,
+.field select:focus-visible,
+.field textarea:focus-visible {
+  outline: none;
+  border-bottom-color: var(--accent);
+  box-shadow: 0 2px 0 var(--accent);
+}
+
+.field [aria-invalid='true'] {
+  border-bottom-color: var(--accent);
+}
+
+.field__error {
+  min-height: 1.4em;
+  margin-top: 0.35rem;
+  font-size: var(--step--1);
+  line-height: 1.4;
+  color: var(--accent);
+}
+
+.field__hint {
+  margin-top: 0.6rem;
+  font-size: var(--step--1);
+  color: var(--muted);
+}
+
+.choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.75rem;
+  padding-top: 0.6rem;
+}
+
+.field .choice {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 2.5rem;
+  margin: 0;
+  font-size: var(--step-0);
+  color: var(--fg);
+  cursor: pointer;
+}
+
+.field .choice input {
+  width: 1.15rem;
+  height: 1.15rem;
+  margin: 0;
+  accent-color: var(--accent);
+}
+
+@media (min-width: 40rem) {
+  .form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .field--wide,
+  .field--choices {
+    grid-column: 1 / -1;
+  }
+}
+
+/* ---------- Confirmation ---------- */
+
+.confirm {
+  margin-top: 0.5rem;
+}
+
+.confirm__text {
+  margin-top: 0.75rem;
+  color: var(--muted);
+}
+
+.confirm__list {
+  margin: 1.75rem 0;
+  border-top: 1px solid var(--rule);
+}
+
+.confirm__list div {
+  display: grid;
+  grid-template-columns: minmax(8rem, 0.4fr) 1fr;
+  gap: 1rem;
+  padding-block: 0.8rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.confirm__list dt {
+  font-size: var(--step--1);
+  color: var(--muted);
+}
+
+.confirm__demo {
+  margin-bottom: 1.75rem;
+  padding: 0.9rem 1.1rem;
+  border: 1px dashed var(--rule-strong);
+  font-size: var(--step--1);
+  color: var(--muted);
+}
+
+.confirm [data-confirm-title]:focus {
+  outline: none;
+}

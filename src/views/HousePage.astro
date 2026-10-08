@@ -1,0 +1,101 @@
+---
+import Inner from './Inner.astro';
+import Frame from '../components/Frame.astro';
+import ReserveBand from '../components/ReserveBand.astro';
+import { routes, type Lang } from '../data/routes';
+import { venue } from '../data/site';
+import { pages } from '../content/pages';
+import { mapsUrl } from '../content/shared';
+
+import room from '../assets/graded/hero-salle.jpg';
+import redRoom from '../assets/graded/salle-rouge.jpg';
+import entrance from '../assets/graded/hero-entree.jpg';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = pages.house[lang];
+---
+
+<Inner
+  lang={lang}
+  page="house"
+  theme="light"
+  picture={{ src: room, alt: t.bannerAlt, shape: 'arc-right', position: '62% 50%' }}
+>
+  <section class="section" data-theme="light">
+    <div class="wrap lead-grid">
+      <div class="lead-grid__intro">
+        <h2 class="title-2">{t.room.title}</h2>
+        {t.room.text.map((paragraph) => <p class="lead-grid__text">{paragraph}</p>)}
+      </div>
+      <figure class="lead-grid__figure">
+        <Frame
+          src={redRoom}
+          alt={t.room.alt}
+          ratio={[4, 3]}
+          sizes="(min-width: 60rem) 38vw, 92vw"
+        />
+        <figcaption>{t.room.caption}</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="section" data-theme="dark">
+    <div class="wrap">
+      <h2 class="title-2 know__title">{t.facts.title}</h2>
+      <div class="know">
+        {
+          t.facts.groups.map((group) => (
+            <div class="know__group">
+              <h3 class="know__name">{group.name}</h3>
+              <ul role="list">
+                {group.items.map((item) => (
+                  <li>{item}</li>
+                ))}
+              </ul>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="section" data-theme="light">
+    <div class="wrap story">
+      <h2 class="title-2">{t.story.title}</h2>
+      {/* A visible slot for content only the restaurant can supply. */}
+      <div class="placeholder">
+        <p class="placeholder__label">{t.story.label}</p>
+        <p>{t.story.text}</p>
+      </div>
+    </div>
+
+    <div class="wrap lead-grid find">
+      <figure class="lead-grid__figure find__figure">
+        <Frame
+          src={entrance}
+          alt={t.find.alt}
+          ratio={[4, 3]}
+          position="50% 45%"
+          sizes="(min-width: 60rem) 46vw, 92vw"
+        />
+      </figure>
+      <div class="lead-grid__intro">
+        <h2 class="title-2">{t.find.title}</h2>
+        <p class="lead-grid__text">{t.find.text}</p>
+        <address class="find__address">
+          {venue.street}<br />
+          {venue.city}, {venue.country[lang]}
+        </address>
+        <div class="actions find__actions">
+          <a class="link" href={routes.reservation[lang]}>{t.find.link}</a>
+          <a class="link" href={mapsUrl} target="_blank" rel="noopener noreferrer">{t.find.map}</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <ReserveBand lang={lang} />
+</Inner>

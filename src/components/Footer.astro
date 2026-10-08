@@ -1,0 +1,164 @@
+---
+import Logo from './Logo.astro';
+import LangSwitch from './LangSwitch.astro';
+import { pageOrder, routes, navLabels, type Lang, type PageKey } from '../data/routes';
+import { common, demo, venue } from '../data/site';
+
+interface Props {
+  lang: Lang;
+  // null on pages outside the six tabs, such as the 404 page.
+  page: PageKey | null;
+}
+const { lang, page } = Astro.props;
+const t = common[lang];
+---
+
+<footer class="site-footer" data-theme="dark">
+  <div class="wrap site-footer__grid">
+    <div class="site-footer__brand">
+      <Logo size="large" tagline={venue.tagline[lang]} />
+    </div>
+
+    <div>
+      <h2 class="site-footer__label no-cast">{t.address}</h2>
+      <p>
+        {venue.street}<br />
+        {venue.city}, {venue.country[lang]}
+      </p>
+    </div>
+
+    <div>
+      <h2 class="site-footer__label no-cast">{t.hours}</h2>
+      <dl class="site-footer__hours">
+        {
+          demo.hours.map((slot) => (
+            <div>
+              <dt>{slot.label[lang]}</dt>
+              <dd>{slot.value[lang]}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+
+    <div>
+      <h2 class="site-footer__label no-cast">{t.contact}</h2>
+      <ul role="list" class="site-footer__links">
+        <li><a href={demo.phone.href}>{demo.phone.display}</a></li>
+        <li><a href={demo.whatsapp}>WhatsApp</a></li>
+        <li><a href={`mailto:${demo.email}`}>{demo.email}</a></li>
+        {demo.socials.map((social) => <li><a href={social.href}>{social.name}</a></li>)}
+      </ul>
+    </div>
+
+    <nav aria-label={t.pages}>
+      <h2 class="site-footer__label no-cast">{t.pages}</h2>
+      <ul role="list" class="site-footer__links">
+        {
+          pageOrder.map((key) => (
+            <li>
+              <a href={routes[key][lang]} aria-current={key === page ? 'page' : undefined}>
+                {navLabels[key][lang]}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+  </div>
+
+  <div class="wrap site-footer__base">
+    <p class="site-footer__note">{t.conceptNote}</p>
+    <div class="site-footer__meta">
+      <p>© 2026 {t.rights}</p>
+      <LangSwitch lang={lang} page={page} />
+    </div>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    border-top: 1px solid var(--rule);
+    padding-block: clamp(3.5rem, 7vw, 6rem) 2rem;
+    font-size: var(--step--1);
+    line-height: 1.7;
+  }
+
+  .site-footer__grid {
+    display: grid;
+    gap: 2.5rem var(--col-gap);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .site-footer__brand {
+    grid-column: 1 / -1;
+  }
+
+  .site-footer__label {
+    margin-bottom: 0.6rem;
+    font-family: var(--font-text);
+    font-size: inherit;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    line-height: inherit;
+    color: var(--muted);
+  }
+
+  .site-footer__hours div + div {
+    margin-top: 0.5rem;
+  }
+
+  .site-footer__hours dt {
+    color: var(--muted);
+  }
+
+  .site-footer__links a {
+    display: inline-block;
+    padding-block: 0.2rem;
+    text-decoration: none;
+    overflow-wrap: anywhere;
+    transition:
+      color 0.25s,
+      translate 0.35s var(--ease);
+  }
+
+  @media (hover: hover) {
+    .site-footer__links a:hover {
+      translate: 0.2rem 0;
+    }
+  }
+
+  .site-footer__links a:hover,
+  .site-footer__links a[aria-current='page'] {
+    color: var(--noeud);
+  }
+
+  .site-footer__base {
+    margin-top: clamp(3rem, 6vw, 5rem);
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--rule);
+    color: var(--muted);
+  }
+
+  .site-footer__note {
+    max-width: 44rem;
+  }
+
+  .site-footer__meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+
+  @media (min-width: 60rem) {
+    .site-footer__grid {
+      grid-template-columns: 1.5fr repeat(4, minmax(0, 1fr));
+    }
+
+    .site-footer__brand {
+      grid-column: auto;
+    }
+  }
+</style>

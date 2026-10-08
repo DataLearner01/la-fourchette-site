@@ -1,0 +1,60 @@
+---
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+  src: ImageMetadata;
+  alt: string;
+  // 'arc-left' and 'arc-right' round one top corner into a quarter circle.
+  shape?: 'plain' | 'arc-left' | 'arc-right';
+  ratio?: [number, number];
+  sizes?: string;
+  position?: string;
+  // Enlarges the picture inside its frame, from the given point, to crop tighter.
+  zoom?: number;
+  origin?: string;
+  eager?: boolean;
+  reveal?: boolean;
+  drift?: boolean;
+  echo?: boolean;
+}
+
+const {
+  src,
+  alt,
+  shape = 'plain',
+  ratio = [4, 5],
+  sizes = '100vw',
+  position = '50% 50%',
+  zoom = 1,
+  origin = '50% 50%',
+  eager = false,
+  reveal = true,
+  drift = true,
+  echo = false,
+} = Astro.props;
+
+const widths = [360, 540, 720, 960, 1280, 1600].filter((w) => w <= src.width);
+if (!widths.includes(src.width)) widths.push(src.width);
+---
+
+<div
+  class:list={['frame-outer', `frame-outer--${shape}`, { 'frame-outer--echo': echo }]}
+  style={`--rw:${ratio[0]};--rh:${ratio[1]}`}
+>
+  <div
+    class:list={['frame', `frame--${shape}`, { reveal, 'frame--drift': drift }]}
+    style={`--pos:${position};--zoom:${zoom};--origin:${origin}`}
+  >
+    <Image
+      src={src}
+      alt={alt}
+      widths={widths}
+      sizes={sizes}
+      quality={80}
+      loading={eager ? 'eager' : 'lazy'}
+      fetchpriority={eager ? 'high' : 'auto'}
+      decoding={eager ? 'sync' : 'async'}
+    />
+  </div>
+</div>

@@ -1,0 +1,72 @@
+---
+import { langs, routes, type Lang, type PageKey } from '../data/routes';
+import { common } from '../data/site';
+
+interface Props {
+  lang: Lang;
+  // null on pages outside the six tabs, such as the 404 page.
+  page: PageKey | null;
+}
+const { lang, page } = Astro.props;
+const names: Record<Lang, string> = { fr: 'Français', en: 'English' };
+---
+
+<ul class="lang-switch" role="list" aria-label={common[lang].langLabel}>
+  {
+    langs.map((code) => (
+      <li>
+        {code === lang ? (
+          <span aria-current="true" lang={code}>
+            <span aria-hidden="true">{code.toUpperCase()}</span>
+            <span class="visually-hidden">{names[code]}</span>
+          </span>
+        ) : (
+          // data-set-lang stores the visitor's choice so it is kept on later visits.
+          <a href={routes[page ?? 'home'][code]} hreflang={code} lang={code} data-set-lang={code}>
+            <span aria-hidden="true">{code.toUpperCase()}</span>
+            <span class="visually-hidden">{names[code]}</span>
+          </a>
+        )}
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  .lang-switch {
+    display: flex;
+    align-items: center;
+    font-size: var(--step--1);
+    letter-spacing: 0.06em;
+  }
+
+  .lang-switch li + li::before {
+    content: '';
+    display: inline-block;
+    width: 1px;
+    height: 0.9em;
+    margin-inline: 0.2rem;
+    background: var(--rule-strong);
+    vertical-align: -0.1em;
+  }
+
+  .lang-switch a,
+  .lang-switch span[aria-current] {
+    display: inline-block;
+    padding: 0.6rem 0.45rem;
+    text-decoration: none;
+  }
+
+  .lang-switch a {
+    color: var(--muted);
+    transition: color 0.25s;
+  }
+
+  .lang-switch a:hover {
+    color: var(--fg);
+  }
+
+  .lang-switch span[aria-current] {
+    color: var(--fg);
+  }
+</style>
