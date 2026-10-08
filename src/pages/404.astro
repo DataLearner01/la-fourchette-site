@@ -3,7 +3,7 @@
 // English for anything under /en/, French otherwise.
 import Base from '../layouts/Base.astro';
 import BowTie from '../components/BowTie.astro';
-import { pageOrder, routes, navLabels, langs } from '../data/routes';
+import { pageOrder, routes, navLabels, langs, base } from '../data/routes';
 import { common } from '../data/site';
 ---
 
@@ -33,10 +33,12 @@ import { common } from '../data/site';
     </div>
   </section>
 
-  <script is:inline>
+  <script is:inline define:vars={{ base }}>
     // Show the English copy for addresses under /en/.
     (function () {
-      if (!/^\/en(\/|$)/.test(location.pathname)) return;
+      if (location.pathname.indexOf(base + '/en') !== 0) return;
+      var rest = location.pathname.slice(base.length + 3);
+      if (rest !== '' && rest.charAt(0) !== '/') return;
       document.documentElement.lang = 'en';
       document.title = 'Page not found | La Fourchette, Douala';
       var blocks = document.querySelectorAll('[data-lost]');

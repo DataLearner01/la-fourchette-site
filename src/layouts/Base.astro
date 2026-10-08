@@ -6,7 +6,7 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import ActionBar from '../components/ActionBar.astro';
 import Pointer from '../components/Pointer.astro';
-import { routes, otherLang, defaultLang, langs, type Lang, type PageKey } from '../data/routes';
+import { routes, withBase, otherLang, defaultLang, langs, type Lang, type PageKey } from '../data/routes';
 import { common, venue } from '../data/site';
 import { mapsUrl } from '../content/shared';
 
@@ -28,7 +28,7 @@ const { lang, page, title, description, noindex = false } = Astro.props;
 const absolute = (path: string) => new URL(path, Astro.site).href;
 const alternatePath = routes[page ?? 'home'][otherLang(lang)];
 const canonical = page ? absolute(routes[page][lang]) : null;
-const shareImage = absolute('/og.jpg');
+const shareImage = absolute(withBase('/og.jpg'));
 
 // Search-engine description of the restaurant. Only verified facts: the phone
 // number and opening hours are demo values and are deliberately left out.
@@ -64,8 +64,8 @@ const restaurant = {
     <link rel="preload" href={bodoniFile} as="font" type="font/woff2" crossorigin />
     <link rel="preload" href={jostFile} as="font" type="font/woff2" crossorigin />
 
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="icon" href={withBase('/favicon.svg')} type="image/svg+xml" />
+    <link rel="apple-touch-icon" href={withBase('/apple-touch-icon.png')} />
 
     {canonical && <link rel="canonical" href={canonical} />}
     {
